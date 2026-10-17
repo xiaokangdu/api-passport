@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static contracts for the deep-sleep key-wake guard wiring in main.c."""
+"""Static contracts for the deep-sleep key-wake guard wiring in the game app."""
 
 from pathlib import Path
 import re
@@ -32,15 +32,15 @@ def function_body(source: str, name: str) -> str:
 class KeyWakeGuardWiringTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.main = read("main/main.c")
+        cls.main = read("main/tetris_app.c")
 
-    def test_on_key_consumes_the_guard_before_the_readiness_check(self) -> None:
-        # A release can arrive after the post-init voltage sample but before input
-        # dispatch is ready. on_key must run the guard first so that release still
-        # disarms it, instead of being discarded by the readiness early-return.
-        body = function_body(self.main, "on_key")
+    def test_on_button_consumes_the_guard_before_the_readiness_check(self) -> None:
+        # A release can arrive after the post-init voltage sample but before the
+        # key queue exists. on_button must run the guard first so that release
+        # still disarms it, instead of being discarded by the readiness early-return.
+        body = function_body(self.main, "on_button")
         self.assertIn("key_guard_consume(", body)
-        self.assertLess(body.index("key_guard_consume("), body.index("!s_input_ready"))
+        self.assertLess(body.index("key_guard_consume("), body.index("!s_key_queue"))
 
 
 if __name__ == "__main__":

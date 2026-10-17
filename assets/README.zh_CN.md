@@ -15,6 +15,28 @@
 - 添加字库前评估 Flash 与内部 RAM 影响；ESP32-C3 无 PSRAM。
 - 不提交许可不允许分发的字库。
 
+| 文件 | 格式 | 用途与来源 |
+| --- | --- | --- |
+| [`fonts/NotoSansSC-Regular.otf`](fonts/NotoSansSC-Regular.otf) | OpenType，8,331,336 字节 | 俄罗斯方块中文界面使用的未修改上游源字体。2026-10-17 下载自 [notofonts/noto-cjk `Sans/SubsetOTF/SC`](https://github.com/notofonts/noto-cjk/tree/main/Sans/SubsetOTF/SC)；SHA-256 `faa6c9df652116dde789d351359f3d7e5d2285a2b2a1f04a2d7244df706d5ea9`。采用 SIL OFL 1.1 许可，见 [`fonts/LICENSE-NotoSansSC.txt`](fonts/LICENSE-NotoSansSC.txt)。 |
+| [`fonts/tetris_symbols.txt`](fonts/tetris_symbols.txt) | UTF-8 文本 | 俄罗斯方块界面的字形清单：包含 `main/tetris_strings.h` 用到的全部汉字与全角感叹号；数字、百分号等 ASCII `0x20–0x7E` 另行加入。 |
+| [`fonts/app_font_14.c`](fonts/app_font_14.c) | LVGL 9 C 源码，4 bpp，不压缩 | 由上述清单生成的 14 px 子集；由 `main/CMakeLists.txt` 编入固件，符号名为 `app_font_14`，用于标签、统计与提示文字。 |
+| [`fonts/app_font_20.c`](fonts/app_font_20.c) | LVGL 9 C 源码，4 bpp，不压缩 | 覆盖范围相同的 20 px 子集，符号名为 `app_font_20`，用于标题、分数与弹层标题。 |
+
+修改字形清单后，在仓库根目录重新生成两份子集：
+
+```sh
+lv_font_conv --font assets/fonts/NotoSansSC-Regular.otf --size 14 --bpp 4 \
+  --format lvgl --no-compress --range 0x20-0x7E \
+  --symbols "$(cat assets/fonts/tetris_symbols.txt)" \
+  --lv-font-name app_font_14 --lv-include lvgl.h -o assets/fonts/app_font_14.c
+lv_font_conv --font assets/fonts/NotoSansSC-Regular.otf --size 20 --bpp 4 \
+  --format lvgl --no-compress --range 0x20-0x7E \
+  --symbols "$(cat assets/fonts/tetris_symbols.txt)" \
+  --lv-font-name app_font_20 --lv-include lvgl.h -o assets/fonts/app_font_20.c
+```
+
+若界面字符串出现子集中缺失的字符，`tests/test_tetris_strings.c` 会直接失败；请同步更新清单并重新执行上述两条命令。
+
 ## 图片（images）
 
 可复用的源图与生成的显示资产放在 `images/`。

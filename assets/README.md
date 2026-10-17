@@ -17,6 +17,28 @@ Store reusable font files and generated font sources in `fonts/`.
 - Check Flash and internal-RAM impact before adding a font; the ESP32-C3 has no PSRAM.
 - Do not commit fonts whose license does not permit redistribution.
 
+| File | Format | Use and source |
+| --- | --- | --- |
+| [`fonts/NotoSansSC-Regular.otf`](fonts/NotoSansSC-Regular.otf) | OpenType, 8,331,336 bytes | Unmodified upstream source font for the Tetris Chinese UI. Downloaded 2026-10-17 from [notofonts/noto-cjk `Sans/SubsetOTF/SC`](https://github.com/notofonts/noto-cjk/tree/main/Sans/SubsetOTF/SC); SHA-256 `faa6c9df652116dde789d351359f3d7e5d2285a2b2a1f04a2d7244df706d5ea9`. Licensed under SIL OFL 1.1, see [`fonts/LICENSE-NotoSansSC.txt`](fonts/LICENSE-NotoSansSC.txt). |
+| [`fonts/tetris_symbols.txt`](fonts/tetris_symbols.txt) | UTF-8 text | Character inventory for the Tetris UI: every Chinese character and the full-width exclamation mark used by `main/tetris_strings.h`. ASCII `0x20–0x7E` is added separately for scores, percentages, and hints. |
+| [`fonts/app_font_14.c`](fonts/app_font_14.c) | LVGL 9 C source, 4 bpp, uncompressed | Generated 14 px subset covering the inventory above. Compiled into the firmware by `main/CMakeLists.txt` as `app_font_14`; used for labels, statistics, and hints. |
+| [`fonts/app_font_20.c`](fonts/app_font_20.c) | LVGL 9 C source, 4 bpp, uncompressed | Generated 20 px subset with the same coverage, compiled as `app_font_20`; used for the title, score, and overlay headings. |
+
+Regenerate both subsets from the repository root after changing the inventory:
+
+```sh
+lv_font_conv --font assets/fonts/NotoSansSC-Regular.otf --size 14 --bpp 4 \
+  --format lvgl --no-compress --range 0x20-0x7E \
+  --symbols "$(cat assets/fonts/tetris_symbols.txt)" \
+  --lv-font-name app_font_14 --lv-include lvgl.h -o assets/fonts/app_font_14.c
+lv_font_conv --font assets/fonts/NotoSansSC-Regular.otf --size 20 --bpp 4 \
+  --format lvgl --no-compress --range 0x20-0x7E \
+  --symbols "$(cat assets/fonts/tetris_symbols.txt)" \
+  --lv-font-name app_font_20 --lv-include lvgl.h -o assets/fonts/app_font_20.c
+```
+
+`tests/test_tetris_strings.c` fails if an interface string contains a character missing from either generated subset, so update the inventory and rerun both commands together.
+
 ## Images
 
 Store reusable source images and generated display assets in `images/`.

@@ -1,16 +1,20 @@
 idf_component_register(
     SRCS "main.c"
-         "demo_navigation.c"
-         "ui_pixel.c"
-         "ui_pixel_math.c"
-         "demo_display.c"
-         "demo_button.c"
-         "demo_audio.c"
-         "demo_battery.c"
-         "demo_radio.c"
-         "demo_wifi.c"
-         "demo_ble.c"
-         "demo_low_power.c"
+         "tetris_app.c"
+         "tetris_audio.c"
+         "tetris_menu.c"
+         "tetris_model.c"
+         "tetris_input.c"
+         "tetris_save.c"
+         "tetris_settings.c"
+         "tetris_sound.c"
+         "tetris_strings.c"
     INCLUDE_DIRS "."
-    REQUIRES bsp bt esp_event esp_hw_support esp_netif esp_timer esp_wifi nvs_flash
+    REQUIRES bsp esp_hw_support esp_timer nvs_flash
+)
+
+# 由 assets/fonts/ 下的 Noto Sans SC 子集生成,直接纳入本组件编译。
+target_sources(${COMPONENT_LIB} PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/../assets/fonts/app_font_14.c"
+    "${CMAKE_CURRENT_LIST_DIR}/../assets/fonts/app_font_20.c"
 )
